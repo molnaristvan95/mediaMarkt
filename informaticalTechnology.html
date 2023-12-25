@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="description" content="Segítség a mindennapokban. Keress terméket, számíts árat, méretet...">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Molnár István || Мельник Степан">
+  <meta name="keywords" content="calculate, size, price, url converter">
+  <meta name="theme-color" content="#f00">
+  <link rel="icon" type="image/png" href="https://www.mediamarkt.hu/favicon-32x32.png" sizes="32x32">
+  <title>Media Markt I.T.</title>
+  <style rel="stylesheet" type="text/css">
+    /* ------------------ base and templates ---------------------*/
+    *:root {
+      font-size: 16px;
+      --pageWasOpen: '2023.12.25';
+    }
+
+    * {
+      box-sizing: border-box;
+      color: #ffab;
+      border-radius: 4px;
+    }
+
+    body#main {
+      margin: 0;
+      background: #000;
+    }
+
+    input,
+    button {
+      color: #ffab;
+      background: #000;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    .clearfix {
+      content: '';
+      display: table;
+      clear: both;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .center {
+      align-items: center;
+      justify-content: center;
+    }
+
+    .equal {
+      justify-content: space-around;
+    }
+
+    .block {
+      display: block;
+      margin: 4px auto;
+      text-align: center;
+      width: 98%;
+    }
+
+    /* ------------------ targeted elements ---------------------*/
+    body::before {
+      content: var(--pageWasOpen);
+    }
+
+    body>*:not(dialog) {
+      width: 98%;
+      margin: 8px auto 4px;
+      padding: 4px;
+      border: 1px solid #333;
+    }
+
+    dialog#sms {
+      background: #000;
+      color: #990;
+    }
+
+    nav {}
+
+    marquee.labels {
+      width: 20%;
+      border: 1px solid #333;
+      padding: 8px 0 8px;
+    }
+
+    #content {}
+
+    form#cat>*:not(#urlLabel) {
+      font-size: 32px;
+    }
+
+    article#catMemory {}
+
+    #catMemory>a {
+      margin-left: 8px;
+      border: 1px solid #333;
+      padding: 2px 4px;
+    }
+
+    small#lengthOfCat::after {
+      content: 'db elem';
+    }
+
+    /* ------------------ media queries ---------------------*/
+
+    /* ------------------ black list quick test ---------------------*/
+
+  </style>
+</head>
+
+<body id="main">
+  <dialog id="sms">Script runs well</dialog>
+  <nav id="navigation" class="flex equal">
+    <marquee class="labels" direction="left" scrollamount="4" scrolldelay="85">CatEntry</marquee>
+    <marquee class="labels" direction="left" scrollamount="4" scrolldelay="100">Monitor / TV méretszámítás átlóból</marquee>
+    <marquee class="labels" direction="left" scrollamount="4" scrolldelay="115">Egységár számítás</marquee>
+  </nav>
+  <section id="content">
+    <form id="cat">
+      <label id="urlLabel" class="block"><i><small>https://www.mediamarkt.hu/catentry/</small></i></label>
+      <input id="catInp" class="block" type="text" maxlength="8" placeholder="cikkszám" value="1234567">
+      <button id="catBtn" class="block" type="button">Megnyit!</button>
+      <article id="catMemory">
+        <div>Előzmény: <small id="lengthOfCat">0</small></div>
+        <br>
+      </article>
+    </form>
+  </section>
+  <script type="text/javascript">
+    /* ---------------------------- base and templates -------------------------------- */
+    const idF = (i) => {
+        return document.getElementById(i);
+      },
+      classF = (c) => {
+        return document.getElementsByClassName(c);
+      },
+      nameF = (n) => {
+        return document.getElementsByName(n);
+      },
+      tagF = (t) => {
+        return document.getElementsByTagName(t);
+      },
+      createF = (c) => {
+        return document.createElement(c);
+      },
+      textF = (variable, t) => {
+        let txt = document.createTextNode(t);
+        variable.appendChild(txt);
+        return;
+      },
+      valueF = (v) => {
+        return idF(v).value;
+      },
+      eventF = (target, triger, func) => {
+        return idF(target).setAttribute(triger, func);
+      },
+      dateAndTimeF = () => {
+        let d = new Date(),
+          y = d.getFullYear(),
+          m = d.getMonth() + 1,
+          day = d.getDate(),
+          h = d.getHours(),
+          min = d.getMinutes(),
+          sec = d.getSeconds(),
+          full = y + '.' + m + '.' + day + '. ' + h + ':' + min + ':' + sec;
+        return full;
+      };
+
+    idF('sms').show();
+    document.documentElement.style.setProperty('--pageWasOpen', '"megnyitva: ' + dateAndTimeF() + '"');
+    /* ---------------------------- targeted functions and Objects -------------------------------- */
+    let dataBase = {
+      catentryUrl: 'https://www.mediamarkt.hu/catentry/',
+      openCat: function() {
+        let catPlusId = this.catentryUrl + valueF('catInp'),
+          win = window.open(catPlusId, 'target=_blank'),
+          anchor = createF('A'),
+          anchInner = valueF('catInp') + ' ' + dateAndTimeF();
+        textF(anchor, anchInner);
+        anchor.href = catPlusId;
+        anchor.setAttribute('target', '_blank');
+        anchor.classList.add('block');
+        idF('catMemory').appendChild(anchor);
+        let memoryLength = document.querySelectorAll('#catMemory>a').length;
+        idF('lengthOfCat').innerHTML = memoryLength;
+      },
+    };
+
+    idF('catInp').onkeyup = () => {
+      let elem = idF('catInp'),
+        el = valueF('catInp').length;
+      switch (el) {
+        case 7:
+          elem.style.background = '#050';
+          break;
+        default:
+          elem.style.background = '#000';
+      }
+    };
+    /* ---------------------------- callback -------------------------------- */
+    eventF('catBtn', 'onclick', 'dataBase.openCat();');
+    /* ---------------------------- patch functions -------------------------------- */
+    function divideNavInsideChildren() {
+      let n = idF('navigation'),
+        nChildren = n.children,
+        nChLen = nChildren.length,
+        percent = 100 / nChLen;
+      for (let x of nChildren) {
+        x.style.width = 'calc(' + percent + '% - 8px)';
+      }
+    }
+    divideNavInsideChildren();
+    /* ---------------------------- load test functions -------------------------------- */
+    console.log('%cScript runs well!', 'font-size:32px; color:orange;');
+    window.setTimeout(() => {
+      idF('sms').close();
+    }, 2048);
+
+  </script>
+</body>
+
+</html>
