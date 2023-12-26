@@ -15,6 +15,7 @@
     *:root {
       font-size: 16px;
       --pageWasOpen: '2023.12.25';
+      --mmLogoWidth: 160px;
     }
 
     * {
@@ -67,13 +68,16 @@
     /* ------------------ targeted elements ---------------------*/
     body::before {
       content: var(--pageWasOpen);
+      position: absolute;
+      top: 5px;
+      left: 6px;
     }
 
     body>*:not(dialog) {
       width: 98%;
       margin: 8px auto 4px;
       padding: 4px;
-      border: 1px solid #333;
+      borde: 1px solid #333;
     }
 
     dialog#sms {
@@ -81,7 +85,16 @@
       color: #990;
     }
 
-    nav {}
+    img#mmlogo {
+      width: var(--mmLogoWidth);
+      position: absolute;
+      top: -10px;
+      left: calc(50% - (var(--mmLogoWidth) / 2));
+    }
+
+    nav {
+      margin: 4vh auto 4px !important;
+    }
 
     marquee.labels {
       width: 20%;
@@ -89,9 +102,16 @@
       padding: 8px 0 8px;
     }
 
-    #content {}
+    #content {
+      height: 80vh;
+      max-height: 80vh;
+      overflow: hidden scroll;
+      border: 1px solid #333;
+    }
 
-    form#cat>*:not(#urlLabel) {
+    form#cat>*:not(#urlLabel),
+    #monitorForm>*,
+    #quantityForm>* {
       font-size: 32px;
     }
 
@@ -103,35 +123,73 @@
       padding: 2px 4px;
     }
 
+    .anchorTime {
+      opacity: .5;
+    }
+
     small#lengthOfCat::after {
-      content: 'db elem';
+      content: 'db cikkszám';
+    }
+
+    #monitorForm {}
+
+    #monitorForm>* {}
+
+    #monitorForm>label::before {
+      content: attr(data-text);
+    }
+
+    #monitorForm>label::after {
+      content: ' cm';
+    }
+
+    quantityForm {}
+
+    footer {
+      opacity: .5;
     }
 
     /* ------------------ media queries ---------------------*/
 
     /* ------------------ black list quick test ---------------------*/
+    #cat,
+    #monitorForm,
+    #quantityForm {
+      display: none;
+    }
 
   </style>
 </head>
 
 <body id="main">
   <dialog id="sms">Script runs well</dialog>
+  <img id="mmlogo" src="https://molnaristvan95.github.io/mediaMarkt/mmLogo.png" type="img/png">
   <nav id="navigation" class="flex equal">
-    <marquee class="labels" direction="left" scrollamount="4" scrolldelay="85">CatEntry</marquee>
-    <marquee class="labels" direction="left" scrollamount="4" scrolldelay="100">Monitor / TV méretszámítás átlóból</marquee>
-    <marquee class="labels" direction="left" scrollamount="4" scrolldelay="115">Egységár számítás</marquee>
+    <marquee id="catOpen" class="labels" direction="left" scrollamount="4" scrolldelay="85">CatEntry</marquee>
+    <marquee id="monitorOpen" class="labels" direction="left" scrollamount="4" scrolldelay="100">Monitor / TV méretszámítás átlóból</marquee>
+    <marquee id="quantityOpen" class="labels" direction="left" scrollamount="4" scrolldelay="115">Egységár számítás</marquee>
   </nav>
   <section id="content">
     <form id="cat">
       <label id="urlLabel" class="block"><i><small>https://www.mediamarkt.hu/catentry/</small></i></label>
-      <input id="catInp" class="block" type="text" maxlength="8" placeholder="cikkszám" value="1234567">
+      <input id="catInp" class="block" type="text" maxlength="8" placeholder="cikkszám" value="">
       <button id="catBtn" class="block" type="button">Megnyit!</button>
       <article id="catMemory">
         <div>Előzmény: <small id="lengthOfCat">0</small></div>
-        <br>
       </article>
     </form>
+    <form id="monitorForm">
+      <input id="inchInp" class="block" type="text" maxlength="2" placeholder="Monitor átló Col-ban megadva 16:9 aránnyal">
+      <label id="diagonal" class="block" data-text="Átló: "></label>
+      <label id="widthMonitor" class="block" data-text="Szélesség: "></label>
+      <label id="heightMonitor" class="block" data-text="Magasság: "></label>
+      <button id="monitorBtn" class="block" type="button">Számold ki!</button>
+    </form>
+    <form id="quantityForm">egységszámoló</form>
   </section>
+  <footer>
+    <center>&#169; 2023-2024 Molnár István &nbsp; Media Markt &#174; Magyarország</center>
+  </footer>
   <script type="text/javascript">
     /* ---------------------------- base and templates -------------------------------- */
     const idF = (i) => {
@@ -160,35 +218,67 @@
       eventF = (target, triger, func) => {
         return idF(target).setAttribute(triger, func);
       },
-      dateAndTimeF = () => {
+      time = (choice) => {
         let d = new Date(),
-          y = d.getFullYear(),
+          y = (d.getFullYear() - 2000) + '\`',
           m = d.getMonth() + 1,
           day = d.getDate(),
           h = d.getHours(),
           min = d.getMinutes(),
-          sec = d.getSeconds(),
-          full = y + '.' + m + '.' + day + '. ' + h + ':' + min + ':' + sec;
-        return full;
+          sec = d.getSeconds();
+        if (m < 10) {
+          m = '0' + m;
+        }
+        if (day < 10) {
+          day = '0' + day;
+        }
+        if (h < 10) {
+          h = '+' + h;
+        }
+        if (min < 10) {
+          min = '0' + min;
+        }
+        if (sec < 10) {
+          sec = '0' + sec;
+        }
+        let date = ' ' + y + '.' + m + '.' + day + '. ',
+          time = ' ' + h + ':' + min + ':' + sec + ' ';
+        if (choice == 'date') {
+          return date;
+        } else {
+          return time;
+        }
       };
 
     idF('sms').show();
-    document.documentElement.style.setProperty('--pageWasOpen', '"megnyitva: ' + dateAndTimeF() + '"');
+    let pageOpenedTime = '"megnyitva: ' + time('date') + ' ' + time() + '"';
+    document.documentElement.style.setProperty('--pageWasOpen', pageOpenedTime);
     /* ---------------------------- targeted functions and Objects -------------------------------- */
     let dataBase = {
       catentryUrl: 'https://www.mediamarkt.hu/catentry/',
       openCat: function() {
         let catPlusId = this.catentryUrl + valueF('catInp'),
           win = window.open(catPlusId, 'target=_blank'),
-          anchor = createF('A'),
-          anchInner = valueF('catInp') + ' ' + dateAndTimeF();
-        textF(anchor, anchInner);
+          anchor = createF('A');
+        anchor.innerHTML = valueF('catInp') + ' <small class="anchorTime"> <small>' + time('date') + '</small>' + time() + '</small>';
         anchor.href = catPlusId;
         anchor.setAttribute('target', '_blank');
         anchor.classList.add('block');
-        idF('catMemory').appendChild(anchor);
+        idF('catMemory').insertBefore(anchor, idF('catMemory').children[1]);
         let memoryLength = document.querySelectorAll('#catMemory>a').length;
         idF('lengthOfCat').innerHTML = memoryLength;
+      },
+      oneInch: 2.54,
+      monitorWidth: 0.871575537125,
+      monitorHeight: 0.490261239633,
+      monitorCalc: function() {
+        let inp = valueF('inchInp'),
+          diag = (inp * this.oneInch).toPrecision(4),
+          finalWidth = (diag * this.monitorWidth).toPrecision(4),
+          finalHeight = (diag * this.monitorHeight).toPrecision(4);
+        idF('diagonal').innerHTML = diag;
+        idF('widthMonitor').innerHTML = finalWidth;
+        idF('heightMonitor').innerHTML = finalHeight;
       },
     };
 
@@ -203,8 +293,34 @@
           elem.style.background = '#000';
       }
     };
+
+    let switcher = (el, active) => {
+      let con = idF('content'),
+        conChil = con.children,
+        navi = idF('navigation'),
+        naviChil = navi.children,
+        theId = el.id;
+      for (let x of conChil) {
+        if (x.id == active) {
+          x.style.display = 'block';
+        } else {
+          x.style.display = 'none';
+        }
+      }
+      for (let y of naviChil) {
+        if (y.id == theId) {
+          y.style.background = '#033';
+        } else {
+          y.style.background = '#000';
+        }
+      }
+    };
     /* ---------------------------- callback -------------------------------- */
     eventF('catBtn', 'onclick', 'dataBase.openCat();');
+    eventF('catOpen', 'onclick', 'switcher(this, "cat")');
+    eventF('monitorOpen', 'onclick', 'switcher(this, "monitorForm")');
+    eventF('quantityOpen', 'onclick', 'switcher(this, "quantityForm")');
+    eventF('monitorBtn', 'onclick', 'dataBase.monitorCalc();');
     /* ---------------------------- patch functions -------------------------------- */
     function divideNavInsideChildren() {
       let n = idF('navigation'),
@@ -221,6 +337,7 @@
     window.setTimeout(() => {
       idF('sms').close();
     }, 2048);
+    idF('monitorOpen').click();
 
   </script>
 </body>
