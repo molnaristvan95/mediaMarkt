@@ -133,7 +133,9 @@
 
     #monitorForm {}
 
-    #monitorForm>* {}
+    #monitorForm>* {
+      margin: 4vh auto 0;
+    }
 
     #monitorForm>label::before {
       content: attr(data-text);
@@ -153,7 +155,7 @@
 
     @media (max-width:1024px) {
       body::before {
-        font-size: 6px;
+        font-size: 8px;
       }
 
       #inchInp::placeholder {
