@@ -36,7 +36,7 @@
     }
 
     *:focus {
-      outline: none;
+      outline: 1px solid red;
     }
 
     .clearfix {
@@ -65,6 +65,10 @@
       width: 98%;
     }
 
+    input[type="reset"] {
+      background: #500;
+    }
+
     /* ------------------ targeted elements ---------------------*/
     body::before {
       content: var(--pageWasOpen);
@@ -81,8 +85,14 @@
     }
 
     dialog#sms {
-      background: #000;
+      background: #000 !important;
       color: #990;
+      top: 25%;
+      left: 0%;
+      width: 50%;
+      height: 50%;
+      position: fixed;
+      font-size: 24px;
     }
 
     img#mmlogo {
@@ -133,6 +143,11 @@
 
     #monitorForm {}
 
+    #monitorimg {
+      width: 64px;
+      margin: 8px auto 0;
+    }
+
     #monitorForm>* {
       margin: 4vh auto 0;
     }
@@ -145,7 +160,33 @@
       content: ' cm';
     }
 
-    quantityForm {}
+    #quantityForm {}
+
+    #quantityForm>* {
+      margin: 3vh auto 0;
+    }
+
+    #quantityForm>*>* {
+      width: 33%;
+      height: 6.4vh;
+      border: 1px solid #333;
+      text-align: center;
+      font-size: 32px;
+    }
+
+    #quantityForm>button,
+    #quantityForm>input[type="reset"] {}
+
+    #qrForm {
+      display: flex;
+      height: 100%;
+    }
+
+    #qrimg {
+      width: 30%;
+      margin: 4vh 35%;
+      border-radius: 8px;
+    }
 
     footer {
       opacity: .5;
@@ -176,7 +217,8 @@
     /* ------------------ black list quick test ---------------------*/
     #cat,
     #monitorForm,
-    #quantityForm {
+    #quantityForm,
+    #qrForm {
       display: none;
     }
 
@@ -184,30 +226,64 @@
 </head>
 
 <body id="main">
-  <dialog id="sms">Script runs well</dialog>
+  <dialog id="sms" class="flex center">Script runs well</dialog>
   <img id="mmlogo" src="https://molnaristvan95.github.io/mediaMarkt/mmLogo.png" type="img/png">
   <nav id="navigation" class="flex equal">
     <marquee id="catOpen" class="labels" direction="left" scrollamount="4" scrolldelay="85">CatEntry</marquee>
     <marquee id="monitorOpen" class="labels" direction="left" scrollamount="4" scrolldelay="100">Monitor / TV méretszámítás átlóból</marquee>
     <marquee id="quantityOpen" class="labels" direction="left" scrollamount="4" scrolldelay="115">Egységár számítás</marquee>
+    <marquee id="share" class="labels" direction="left" scrollamount="4" scrolldelay="130">Oszd meg QR kóddal!</marquee>
   </nav>
   <section id="content">
     <form id="cat">
       <label id="urlLabel" class="block"><i><small>https://www.mediamarkt.hu/catentry/</small></i></label>
       <input id="catInp" class="block" type="text" maxlength="8" placeholder="cikkszám" value="">
       <button id="catBtn" class="block" type="button">Megnyit!</button>
+      <button id="copyCikk" class="block" type="button">Másold a cikkszámot!</button>
       <article id="catMemory">
         <div>Előzmény: <small id="lengthOfCat">0</small></div>
       </article>
     </form>
     <form id="monitorForm">
+      <img id="monitorimg" class="block" src="https://molnaristvan95.github.io/mediaMarkt/monitorDiagonal.png" type="img/png">
       <input id="inchInp" class="block" type="text" maxlength="2" placeholder="Monitor átló Col-ban megadva 16:9 aránnyal">
       <label id="diagonal" class="block" data-text="Átló: "></label>
       <label id="widthMonitor" class="block" data-text="Szélesség: "></label>
       <label id="heightMonitor" class="block" data-text="Magasság: "></label>
       <button id="monitorBtn" class="block" type="button">Számold ki!</button>
     </form>
-    <form id="quantityForm">egységszámoló</form>
+    <form id="quantityForm">
+      <div class="flex center equal">
+        <label>Ár</label>
+        <label>Darab</label>
+        <label>Egységár</label>
+      </div>
+      <div class="flex center equal">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6" disabled>
+      </div>
+      <div class="flex center equal">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6" disabled>
+      </div>
+      <div class="flex center equal">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6" disabled>
+      </div>
+      <div class="flex center equal">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6">
+        <input type="text" maxlength="6" disabled>
+      </div>
+      <button id="quanBtn" type="button" class="block">Számold ki!</button>
+      <input type="reset" class="block">
+    </form>
+    <form id="qrForm">
+      <img id="qrimg" src="https://molnaristvan95.github.io/mediaMarkt/qrShare.png" type="img/png">
+    </form>
   </section>
   <footer>
     <center>&#169; 2023-2024 Molnár István &nbsp; Media Markt &#174; Magyarország</center>
@@ -337,12 +413,36 @@
         }
       }
     };
+
+    let formQuantity = (w) => {
+      let a = w.children[0].value,
+        b = w.children[1].value,
+        c = w.children[2],
+        equals = eval(a / b).toPrecision(4);
+      c.value = equals;
+    };
+    let activateCalculatingQuantity = () => {
+      let elem = idF('quantityForm');
+      for (let u = 1; u < 5; u++) {
+        formQuantity(elem.children[u]);
+      }
+    };
+
+    let copyNumber = () => {
+      let val = idF('catInp');
+      val.select();
+      document.execCommand('copy');
+    };
     /* ---------------------------- callback -------------------------------- */
     eventF('catBtn', 'onclick', 'dataBase.openCat();');
     eventF('catOpen', 'onclick', 'switcher(this, "cat")');
     eventF('monitorOpen', 'onclick', 'switcher(this, "monitorForm")');
     eventF('quantityOpen', 'onclick', 'switcher(this, "quantityForm")');
+    eventF('share', 'onclick', 'switcher(this, "qrForm")');
+
     eventF('monitorBtn', 'onclick', 'dataBase.monitorCalc();');
+    eventF('quanBtn', 'onclick', 'activateCalculatingQuantity()');
+    eventF('copyCikk', 'onclick', 'copyNumber();');
     /* ---------------------------- patch functions -------------------------------- */
     function divideNavInsideChildren() {
       let n = idF('navigation'),
@@ -358,8 +458,9 @@
     console.log('%cScript runs well!', 'font-size:32px; color:orange;');
     window.setTimeout(() => {
       idF('sms').close();
+      idF('sms').style.display = 'none';
     }, 2048);
-    idF('monitorOpen').click();
+    idF('catOpen').click();
 
   </script>
 </body>
